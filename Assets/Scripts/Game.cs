@@ -131,7 +131,8 @@ public class Game : MonoBehaviour
 
     public void Update()
     {
-        if (gameOver == true && Input.GetMouseButtonDown(0))
+        // restart game only on a keyboard press, not a mouse click
+        if (gameOver == true && Input.anyKeyDown && !(Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1) || Input.GetMouseButtonDown(2)))
         {
             gameOver = false;
 
@@ -143,9 +144,11 @@ public class Game : MonoBehaviour
     {
         gameOver = true;
 
+        string playerName = player == "white" ? "Strawberry" : "Blueberry";
+
         Text winnerText = GameObject.FindGameObjectWithTag("WinnerText").GetComponent<Text>();
         winnerText.enabled = true;
-        winnerText.text = char.ToUpper(player[0]) + player.Substring(1) + " wins!";
+        winnerText.text = playerName + " won in " + turnCounter + " moves.";
 
         GameObject.FindGameObjectWithTag("RestartText").GetComponent<Text>().enabled = true;
     }
