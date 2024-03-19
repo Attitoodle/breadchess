@@ -157,4 +157,9 @@ public class Game : MonoBehaviour
     {
         return turnCounter;
     }
+
+    public void QuitGame()
+    {
+        Application.Quit();
+    }
 }

@@ -24,8 +24,10 @@ public class MovePlate : MonoBehaviour
             gameObject.GetComponent<SpriteRenderer>().color = new Color(1.0f, 0.0f, 0.0f, 1.0f);
         }
     }
-    public void OnMouseUp()
+    private void OnMouseUp()
     {
+        if (PauseMenu.isPaused) return;
+
         Chessman chessman = parent.GetComponent<Chessman>();
         Game game = GameObject.FindGameObjectWithTag("GameController").GetComponent<Game>();
 
