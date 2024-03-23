@@ -21,6 +21,7 @@ public class Game : MonoBehaviour
 
     void Start()
     {
+        GameObject.FindGameObjectWithTag("ResignButton").GetComponent<Button>().interactable = true;
         turnCounter = 0;
         white = new GameObject[] {
             CreateChessman("white", "rook", 0, 0),
@@ -132,7 +133,7 @@ public class Game : MonoBehaviour
     public void Update()
     {
         // restart game only on a keyboard press, not a mouse click
-        if (gameOver == true && Input.anyKeyDown && !(Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1) || Input.GetMouseButtonDown(2)))
+        if (gameOver == true && Input.anyKeyDown && !(Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1) || Input.GetMouseButtonDown(2) || Input.GetKeyDown(KeyCode.Escape)))
         {
             gameOver = false;
 
@@ -151,6 +152,7 @@ public class Game : MonoBehaviour
         winnerText.text = playerName + " won in " + turnCounter + " moves.";
 
         GameObject.FindGameObjectWithTag("RestartText").GetComponent<Text>().enabled = true;
+        GameObject.FindGameObjectWithTag("ResignButton").GetComponent<Button>().interactable = false;
     }
 
     public int GetTurnNumber()
@@ -160,6 +162,6 @@ public class Game : MonoBehaviour
 
     public void QuitGame()
     {
-        Application.Quit();
+        Utils.QuitGame();
     }
 }

@@ -28,6 +28,11 @@ public class PauseMenu : MonoBehaviour
         }
     }
 
+    public void GoToMainMenu()
+    {
+        Utils.LoadScene("Scenes/MainMenu");
+    }
+
     public void PauseGame()
     {
         pauseMenu.SetActive(true);

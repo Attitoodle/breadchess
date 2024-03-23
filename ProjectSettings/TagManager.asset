@@ -7,6 +7,7 @@ TagManager:
   - MovePlate
   - WinnerText
   - RestartText
+  - ResignButton
   layers:
   - Default
   - TransparentFX
