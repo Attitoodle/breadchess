@@ -52,4 +52,14 @@ public class PauseMenu : MonoBehaviour
         game.Winner(game.GetCurrentPlayer() == "white" ? "black" : "white");
         ResumeGame();
     }
+
+    public void SaveGame()
+    {
+        DataPersistenceManager.instance.SaveGame();
+    }
+
+    public void LoadGame()
+    {
+        DataPersistenceManager.instance.LoadGame();
+    }
 }

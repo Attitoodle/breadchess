@@ -4,14 +4,12 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public class Game : MonoBehaviour
+public class Game : MonoBehaviour, IDataPersistence
 {
     public GameObject chesspiece;
     // Start is called before the first frame update
 
     private GameObject[,] board = new GameObject[8, 8]; // 8x8 board
-    private GameObject[] black = new GameObject[16]; // 16 pieces per player
-    private GameObject[] white = new GameObject[16]; // 16 pieces per player
 
     private string currentPlayer = "white";
 
@@ -19,52 +17,63 @@ public class Game : MonoBehaviour
 
     private int turnCounter = -1;
 
-    void Start()
+    void Awake()
     {
         GameObject.FindGameObjectWithTag("ResignButton").GetComponent<Button>().interactable = true;
+    }
+    void Start()
+    {
         turnCounter = 0;
-        white = new GameObject[] {
-            CreateChessman("white", "rook", 0, 0),
-            CreateChessman("white", "knight", 1, 0),
-            CreateChessman("white", "bishop", 2, 0),
-            CreateChessman("white", "queen", 3, 0),
-            CreateChessman("white", "king", 4, 0),
-            CreateChessman("white", "bishop", 5, 0),
-            CreateChessman("white", "knight", 6, 0),
-            CreateChessman("white", "rook", 7, 0),
-            CreateChessman("white", "pawn", 0, 1),
-            CreateChessman("white", "pawn", 1, 1),
-            CreateChessman("white", "pawn", 2, 1),
-            CreateChessman("white", "pawn", 3, 1),
-            CreateChessman("white", "pawn", 4, 1),
-            CreateChessman("white", "pawn", 5, 1),
-            CreateChessman("white", "pawn", 6, 1),
-            CreateChessman("white", "pawn", 7, 1)
-        };
-        black = new GameObject[] {
-            CreateChessman("black", "rook", 0, 7),
-            CreateChessman("black", "knight", 1, 7),
-            CreateChessman("black", "bishop", 2, 7),
-            CreateChessman("black", "queen", 3, 7),
-            CreateChessman("black", "king", 4, 7),
-            CreateChessman("black", "bishop", 5, 7),
-            CreateChessman("black", "knight", 6, 7),
-            CreateChessman("black", "rook", 7, 7),
-            CreateChessman("black", "pawn", 0, 6),
-            CreateChessman("black", "pawn", 1, 6),
-            CreateChessman("black", "pawn", 2, 6),
-            CreateChessman("black", "pawn", 3, 6),
-            CreateChessman("black", "pawn", 4, 6),
-            CreateChessman("black", "pawn", 5, 6),
-            CreateChessman("black", "pawn", 6, 6),
-            CreateChessman("black", "pawn", 7, 6)
+        // TODOS: put this in its own set pieces method
+        // need to track the pieces as a list so they can be iterated on and saved
+        List<ChessmanData> dataList = new List<ChessmanData> {
+            new ChessmanData("white", "rook", 0, 0),
+            new ChessmanData("white", "knight", 1, 0),
+            new ChessmanData("white", "bishop", 2, 0),
+            new ChessmanData("white", "queen", 3, 0),
+            new ChessmanData("white", "king", 4, 0),
+            new ChessmanData("white", "bishop", 5, 0),
+            new ChessmanData("white", "knight", 6, 0),
+            new ChessmanData("white", "rook", 7, 0),
+            new ChessmanData("white", "pawn", 0, 1),
+            new ChessmanData("white", "pawn", 1, 1),
+            new ChessmanData("white", "pawn", 2, 1),
+            new ChessmanData("white", "pawn", 3, 1),
+            new ChessmanData("white", "pawn", 4, 1),
+            new ChessmanData("white", "pawn", 5, 1),
+            new ChessmanData("white", "pawn", 6, 1),
+            new ChessmanData("white", "pawn", 7, 1),
+            new ChessmanData("black", "rook", 0, 7),
+            new ChessmanData("black", "knight", 1, 7),
+            new ChessmanData("black", "bishop", 2, 7),
+            new ChessmanData("black", "queen", 3, 7),
+            new ChessmanData("black", "king", 4, 7),
+            new ChessmanData("black", "bishop", 5, 7),
+            new ChessmanData("black", "knight", 6, 7),
+            new ChessmanData("black", "rook", 7, 7),
+            new ChessmanData("black", "pawn", 0, 6),
+            new ChessmanData("black", "pawn", 1, 6),
+            new ChessmanData("black", "pawn", 2, 6),
+            new ChessmanData("black", "pawn", 3, 6),
+            new ChessmanData("black", "pawn", 4, 6),
+            new ChessmanData("black", "pawn", 5, 6),
+            new ChessmanData("black", "pawn", 6, 6),
+            new ChessmanData("black", "pawn", 7, 6)
         };
 
+        InitializeBoard(dataList);
+    }
 
-        for (int i = 0; i < black.Length; i++)
+    private void InitializeBoard(List<ChessmanData> dataList)
+    {
+        foreach (GameObject square in board)
         {
-            SetPosition(white[i]);
-            SetPosition(black[i]);
+            if (square == null) continue;
+            Destroy(square);
+        }
+        foreach (ChessmanData data in dataList)
+        {
+            SetPosition(CreateChessman(data.player, data.piece, data.x, data.y));
         }
     }
 
@@ -128,6 +137,8 @@ public class Game : MonoBehaviour
         {
             currentPlayer = "black";
         }
+
+        Debug.Log("next turn " + this.GetTurnNumber());
     }
 
     public void Update()
@@ -163,5 +174,58 @@ public class Game : MonoBehaviour
     public void QuitGame()
     {
         Utils.QuitGame();
+    }
+
+    public void LoadData(GameData data)
+    {
+        turnCounter = data.turnCounter;
+        currentPlayer = data.currentPlayer;
+        gameOver = data.gameOver;
+
+        Debug.Log(data.currentPlayer);
+        InitializeBoard(data.pieces);
+
+        if (gameOver)
+        {
+            Winner(currentPlayer);
+        }
+    }
+
+    public void SaveData(GameData data)
+    {
+        data.turnCounter = turnCounter;
+        data.currentPlayer = currentPlayer;
+        data.gameOver = gameOver;
+
+        List<ChessmanData> pieces = new List<ChessmanData>();
+
+        foreach (GameObject boardSquare in board)
+        {
+            if (boardSquare == null) continue;
+            Chessman chessman = boardSquare.GetComponent<Chessman>();
+            pieces.Add(new ChessmanData(chessman.GetPlayer(), chessman.GetPiece(), chessman.GetX(), chessman.GetY()));
+        }
+
+        data.pieces = pieces;
+
+
+
+        Debug.Log("Save Data " + data.turnCounter + " " + turnCounter + " " + this.GetTurnNumber());
+    }
+}
+
+public struct ChessmanData
+{
+    public int x;
+    public int y;
+    public string player;
+    public string piece;
+
+    public ChessmanData(string player, string piece, int x, int y)
+    {
+        this.player = player;
+        this.piece = piece;
+        this.x = x;
+        this.y = y;
     }
 }
