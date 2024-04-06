@@ -718,7 +718,7 @@ GameObject:
   - component: {fileID: 520991184}
   m_Layer: 5
   m_Name: SaveButton
-  m_TagString: Untagged
+  m_TagString: SaveButton
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1718,6 +1718,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 707fb46c1c9694c4ba54d48fd982dc3f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  fileName: data.game
 --- !u!4 &1478726141
 Transform:
   m_ObjectHideFlags: 0

@@ -4,9 +4,12 @@ using UnityEngine;
 using System.Linq;
 public class DataPersistenceManager : MonoBehaviour
 {
+    [Header("File Storage Config")]
+    [SerializeField] private string fileName;
     private GameData gameData;
 
     private List<IDataPersistence> dataPersistenceObjects;
+    private FileDataHandler dataHandler;
     public static DataPersistenceManager instance { get; private set; }
 
     private void Awake()
@@ -20,6 +23,7 @@ public class DataPersistenceManager : MonoBehaviour
 
     private void Start()
     {
+        dataHandler = new FileDataHandler(Application.persistentDataPath, fileName);
         dataPersistenceObjects = FindAllDataPersistenceObjects();
     }
 
@@ -40,14 +44,15 @@ public class DataPersistenceManager : MonoBehaviour
             dataPersistenceObj.SaveData(gameData);
         }
 
-        Debug.Log("GameData saved on turn " + gameData.turnCounter);
+        dataHandler.Save(gameData);
     }
 
     public void LoadGame()
     {
+        gameData = dataHandler.Load();
+
         if (gameData == null)
         {
-            Debug.Log("No game data found. Initializing data with defaults.");
             NewGame();
         }
 
@@ -55,8 +60,6 @@ public class DataPersistenceManager : MonoBehaviour
         {
             dataPersistenceObj.LoadData(gameData);
         }
-
-        Debug.Log("loaded");
     }
 
     public void OnApplicationQuit()

@@ -5,6 +5,10 @@ using UnityEngine.SceneManagement;
 
 public static class Utils
 {
+    public static void LoadGame()
+    {
+        DataPersistenceManager.instance.LoadGame();
+    }
     public static void LoadScene()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);

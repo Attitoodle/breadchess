@@ -8,6 +8,7 @@ TagManager:
   - WinnerText
   - RestartText
   - ResignButton
+  - SaveButton
   layers:
   - Default
   - TransparentFX

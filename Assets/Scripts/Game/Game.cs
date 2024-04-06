@@ -20,6 +20,8 @@ public class Game : MonoBehaviour, IDataPersistence
     void Awake()
     {
         GameObject.FindGameObjectWithTag("ResignButton").GetComponent<Button>().interactable = true;
+        // GameObject.FindGameObjectWithTag("SaveButton").GetComponent<Button>().interactable = false;
+
     }
     void Start()
     {
@@ -71,6 +73,7 @@ public class Game : MonoBehaviour, IDataPersistence
             if (square == null) continue;
             Destroy(square);
         }
+        //TODO figure out why the board is being wiped instead of loading the data. Might be an async issue. Loads fine when everything is stored in memory. 
         foreach (ChessmanData data in dataList)
         {
             SetPosition(CreateChessman(data.player, data.piece, data.x, data.y));
@@ -138,7 +141,7 @@ public class Game : MonoBehaviour, IDataPersistence
             currentPlayer = "black";
         }
 
-        Debug.Log("next turn " + this.GetTurnNumber());
+        // GameObject.FindGameObjectWithTag("SaveButton").GetComponent<Button>().interactable = true;
     }
 
     public void Update()
@@ -150,6 +153,7 @@ public class Game : MonoBehaviour, IDataPersistence
 
             SceneManager.LoadScene("Game");
         }
+
     }
 
     public void Winner(string player)
@@ -181,14 +185,21 @@ public class Game : MonoBehaviour, IDataPersistence
         turnCounter = data.turnCounter;
         currentPlayer = data.currentPlayer;
         gameOver = data.gameOver;
+        List<ChessmanData> pieces = new List<ChessmanData>();
 
-        Debug.Log(data.currentPlayer);
-        InitializeBoard(data.pieces);
+        foreach (string pieceData in data.pieces)
+        {
+            pieces.Add(JsonUtility.FromJson<ChessmanData>(pieceData));
+        }
+
+        InitializeBoard(pieces);
 
         if (gameOver)
         {
             Winner(currentPlayer);
         }
+
+        GameObject.FindGameObjectWithTag("SaveButton").GetComponent<Button>().interactable = false;
     }
 
     public void SaveData(GameData data)
@@ -197,20 +208,15 @@ public class Game : MonoBehaviour, IDataPersistence
         data.currentPlayer = currentPlayer;
         data.gameOver = gameOver;
 
-        List<ChessmanData> pieces = new List<ChessmanData>();
-
+        List<string> pieces = new List<string>();
+        int i = 0;
         foreach (GameObject boardSquare in board)
         {
             if (boardSquare == null) continue;
             Chessman chessman = boardSquare.GetComponent<Chessman>();
-            pieces.Add(new ChessmanData(chessman.GetPlayer(), chessman.GetPiece(), chessman.GetX(), chessman.GetY()));
+            pieces.Add(JsonUtility.ToJson(new ChessmanData(chessman.GetPlayer(), chessman.GetPiece(), chessman.GetX(), chessman.GetY())));
         }
-
         data.pieces = pieces;
-
-
-
-        Debug.Log("Save Data " + data.turnCounter + " " + turnCounter + " " + this.GetTurnNumber());
     }
 }
 

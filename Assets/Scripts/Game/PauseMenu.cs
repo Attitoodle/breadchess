@@ -60,6 +60,6 @@ public class PauseMenu : MonoBehaviour
 
     public void LoadGame()
     {
-        DataPersistenceManager.instance.LoadGame();
+        Utils.LoadGame();
     }
 }

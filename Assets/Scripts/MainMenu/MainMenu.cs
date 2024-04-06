@@ -8,6 +8,12 @@ public class MainMenu : MonoBehaviour
     {
         Utils.LoadScene();
     }
+
+    public void LoadGame()
+    {
+        Utils.LoadScene();
+        Utils.LoadGame();
+    }
     public void QuitGame()
     {
         Utils.QuitGame();
