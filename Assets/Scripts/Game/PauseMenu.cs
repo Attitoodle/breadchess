@@ -61,5 +61,6 @@ public class PauseMenu : MonoBehaviour
     public void LoadGame()
     {
         Utils.LoadGame();
+        ResumeGame();
     }
 }
