@@ -8,7 +8,7 @@ public class GameData
     public List<string> pieces;
     public string currentPlayer;
     public bool gameOver;
-    public int turnCounter;
+    public int turnCounter = -1;
 
 
 }

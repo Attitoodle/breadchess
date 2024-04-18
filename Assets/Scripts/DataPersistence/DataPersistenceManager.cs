@@ -9,6 +9,8 @@ public class DataPersistenceManager : MonoBehaviour
     [SerializeField] private string fileName;
     private GameData gameData;
 
+    private GameData saveData;
+
     private List<IDataPersistence> dataPersistenceObjects;
     private FileDataHandler dataHandler;
     public static DataPersistenceManager instance { get; private set; }
@@ -23,28 +25,33 @@ public class DataPersistenceManager : MonoBehaviour
         instance = this;
         DontDestroyOnLoad(this.gameObject);
         dataHandler = new FileDataHandler(Application.persistentDataPath, fileName);
+        gameData = new GameData();
+        saveData = dataHandler.Load();
     }
 
     public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         dataPersistenceObjects = FindAllDataPersistenceObjects();
+
+        foreach (IDataPersistence dataPersistenceObj in dataPersistenceObjects)
+        {
+            dataPersistenceObj.LoadData(gameData);
+        }
     }
 
-    public void OnSceneUnloaded(Scene scene)
+    public bool SaveExists()
     {
-
+        return saveData != null;
     }
 
     public void OnEnable()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
-        SceneManager.sceneUnloaded += OnSceneUnloaded;
     }
 
     public void OnDisable()
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
-        SceneManager.sceneUnloaded -= OnSceneUnloaded;
     }
 
     public void NewGame()
@@ -56,7 +63,8 @@ public class DataPersistenceManager : MonoBehaviour
     {
         if (gameData == null)
         {
-            NewGame();
+            Debug.LogError("No game data exits to save.");
+            return;
         }
 
         foreach (IDataPersistence dataPersistenceObj in dataPersistenceObjects)
@@ -69,22 +77,15 @@ public class DataPersistenceManager : MonoBehaviour
 
     public void LoadGame()
     {
-        gameData = dataHandler.Load();
+        saveData = dataHandler.Load();
 
-        if (gameData == null)
+        if (!SaveExists())
         {
-            NewGame();
+            Debug.LogError("No save game data exits to load from.");
+            return;
         }
 
-        foreach (IDataPersistence dataPersistenceObj in dataPersistenceObjects)
-        {
-            dataPersistenceObj.LoadData(gameData);
-        }
-    }
-
-    public void OnApplicationQuit()
-    {
-        // SaveGame();
+        gameData = saveData;
     }
 
     private List<IDataPersistence> FindAllDataPersistenceObjects()

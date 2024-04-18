@@ -260,6 +260,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae77dbefb35ff4a329829dc86b5995b9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  loadButton: {fileID: 1818937351}
+  mainMenuButton: {fileID: 1483512224}
+  resignButton: {fileID: 946994122}
+  resumeButton: {fileID: 1578869590}
+  saveButton: {fileID: 520991184}
+  quitButton: {fileID: 325105434}
   pauseMenu: {fileID: 2087943131}
 --- !u!1 &238726447
 GameObject:
@@ -428,8 +434,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 223587993}
-        m_TargetAssemblyTypeName: Game, Assembly-CSharp
+      - m_Target: {fileID: 223587994}
+        m_TargetAssemblyTypeName: PauseMenu, Assembly-CSharp
         m_MethodName: QuitGame
         m_Mode: 1
         m_Arguments:
@@ -2303,7 +2309,7 @@ GameObject:
   - component: {fileID: 2087943133}
   m_Layer: 5
   m_Name: PauseMenu
-  m_TagString: Untagged
+  m_TagString: PauseMenu
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

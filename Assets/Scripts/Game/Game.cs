@@ -14,68 +14,27 @@ public class Game : MonoBehaviour, IDataPersistence
     private string currentPlayer = "white";
 
     private bool gameOver = false;
+    private bool pristine = true;
 
-    private int turnCounter = -1;
+    private int turnCounter = 0;
 
     void Awake()
     {
-        GameObject.FindGameObjectWithTag("ResignButton").GetComponent<Button>().interactable = true;
-        // GameObject.FindGameObjectWithTag("SaveButton").GetComponent<Button>().interactable = false;
-
+        PauseMenu.isPaused = false;
+        // its not the pause menu. something is keeping the move plates from interacting with the pieces properly, pressing escape to go to the menu once fixes it for some reason. once the piece becomes interactable, though, the move plates dont properly collide with existing pieces (e.g., pawns can attack pawns infront of them)
     }
-    void Start()
-    {
-        turnCounter = 0;
-        // TODOS: put this in its own set pieces method
-        // need to track the pieces as a list so they can be iterated on and saved
-        List<ChessmanData> dataList = new List<ChessmanData> {
-            new ChessmanData("white", "rook", 0, 0),
-            new ChessmanData("white", "knight", 1, 0),
-            new ChessmanData("white", "bishop", 2, 0),
-            new ChessmanData("white", "queen", 3, 0),
-            new ChessmanData("white", "king", 4, 0),
-            new ChessmanData("white", "bishop", 5, 0),
-            new ChessmanData("white", "knight", 6, 0),
-            new ChessmanData("white", "rook", 7, 0),
-            new ChessmanData("white", "pawn", 0, 1),
-            new ChessmanData("white", "pawn", 1, 1),
-            new ChessmanData("white", "pawn", 2, 1),
-            new ChessmanData("white", "pawn", 3, 1),
-            new ChessmanData("white", "pawn", 4, 1),
-            new ChessmanData("white", "pawn", 5, 1),
-            new ChessmanData("white", "pawn", 6, 1),
-            new ChessmanData("white", "pawn", 7, 1),
-            new ChessmanData("black", "rook", 0, 7),
-            new ChessmanData("black", "knight", 1, 7),
-            new ChessmanData("black", "bishop", 2, 7),
-            new ChessmanData("black", "queen", 3, 7),
-            new ChessmanData("black", "king", 4, 7),
-            new ChessmanData("black", "bishop", 5, 7),
-            new ChessmanData("black", "knight", 6, 7),
-            new ChessmanData("black", "rook", 7, 7),
-            new ChessmanData("black", "pawn", 0, 6),
-            new ChessmanData("black", "pawn", 1, 6),
-            new ChessmanData("black", "pawn", 2, 6),
-            new ChessmanData("black", "pawn", 3, 6),
-            new ChessmanData("black", "pawn", 4, 6),
-            new ChessmanData("black", "pawn", 5, 6),
-            new ChessmanData("black", "pawn", 6, 6),
-            new ChessmanData("black", "pawn", 7, 6)
-        };
-
-        InitializeBoard(dataList);
-    }
-
     private void InitializeBoard(List<ChessmanData> dataList)
     {
+        Debug.Log("isPaused " + PauseMenu.isPaused);
         foreach (GameObject square in board)
         {
             if (square == null) continue;
+            Debug.Log(square.name);
             Destroy(square);
         }
-        //TODO figure out why the board is being wiped instead of loading the data. Might be an async issue. Loads fine when everything is stored in memory. 
         foreach (ChessmanData data in dataList)
         {
+            // Debug.Log(data.player + " " + data.piece + " " + data.x + "," + data.y);
             SetPosition(CreateChessman(data.player, data.piece, data.x, data.y));
         }
     }
@@ -83,6 +42,7 @@ public class Game : MonoBehaviour, IDataPersistence
     public GameObject CreateChessman(string player, string piece, int x, int y)
     {
         GameObject boardSquare = Instantiate(chesspiece, new Vector3(0, 0, -1), Quaternion.identity);
+        // problem may be with this instantiate. maybe the last instances arent being killed off or something? its spawning everything in the middle of hte board
         Chessman chessman = boardSquare.GetComponent<Chessman>();
         chessman.SetPiece(piece);
         chessman.SetPlayer(player);
@@ -129,8 +89,14 @@ public class Game : MonoBehaviour, IDataPersistence
         return gameOver;
     }
 
+    public bool IsPristine()
+    {
+        return pristine;
+    }
+
     public void NextTurn()
     {
+        pristine = false;
         if (currentPlayer == "black")
         {
             currentPlayer = "white";
@@ -140,8 +106,6 @@ public class Game : MonoBehaviour, IDataPersistence
         {
             currentPlayer = "black";
         }
-
-        // GameObject.FindGameObjectWithTag("SaveButton").GetComponent<Button>().interactable = true;
     }
 
     public void Update()
@@ -167,7 +131,6 @@ public class Game : MonoBehaviour, IDataPersistence
         winnerText.text = playerName + " won in " + turnCounter + " moves.";
 
         GameObject.FindGameObjectWithTag("RestartText").GetComponent<Text>().enabled = true;
-        GameObject.FindGameObjectWithTag("ResignButton").GetComponent<Button>().interactable = false;
     }
 
     public int GetTurnNumber()
@@ -182,21 +145,63 @@ public class Game : MonoBehaviour, IDataPersistence
 
     public void LoadData(GameData data)
     {
-        turnCounter = data.turnCounter;
-        currentPlayer = data.currentPlayer;
-        gameOver = data.gameOver;
-        List<ChessmanData> pieces = new List<ChessmanData>();
-
-        foreach (string pieceData in data.pieces)
+        if (data.turnCounter > -1)
         {
-            pieces.Add(JsonUtility.FromJson<ChessmanData>(pieceData));
+            turnCounter = data.turnCounter;
+            currentPlayer = data.currentPlayer;
+            gameOver = data.gameOver;
+            List<ChessmanData> pieces = new List<ChessmanData>();
+
+            foreach (string pieceData in data.pieces)
+            {
+                pieces.Add(JsonUtility.FromJson<ChessmanData>(pieceData));
+            }
+
+            InitializeBoard(pieces);
+
+            if (gameOver)
+            {
+                Winner(currentPlayer);
+            }
         }
-
-        InitializeBoard(pieces);
-
-        if (gameOver)
+        else
         {
-            Winner(currentPlayer);
+            List<ChessmanData> pieceList = new List<ChessmanData> {
+                new ChessmanData("white", "rook", 0, 0),
+                new ChessmanData("white", "knight", 1, 0),
+                new ChessmanData("white", "bishop", 2, 0),
+                new ChessmanData("white", "queen", 3, 0),
+                new ChessmanData("white", "king", 4, 0),
+                new ChessmanData("white", "bishop", 5, 0),
+                new ChessmanData("white", "knight", 6, 0),
+                new ChessmanData("white", "rook", 7, 0),
+                new ChessmanData("white", "pawn", 0, 1),
+                new ChessmanData("white", "pawn", 1, 1),
+                new ChessmanData("white", "pawn", 2, 1),
+                new ChessmanData("white", "pawn", 3, 1),
+                new ChessmanData("white", "pawn", 4, 1),
+                new ChessmanData("white", "pawn", 5, 1),
+                new ChessmanData("white", "pawn", 6, 1),
+                new ChessmanData("white", "pawn", 7, 1),
+                new ChessmanData("black", "rook", 0, 7),
+                new ChessmanData("black", "knight", 1, 7),
+                new ChessmanData("black", "bishop", 2, 7),
+                new ChessmanData("black", "queen", 3, 7),
+                new ChessmanData("black", "king", 4, 7),
+                new ChessmanData("black", "bishop", 5, 7),
+                new ChessmanData("black", "knight", 6, 7),
+                new ChessmanData("black", "rook", 7, 7),
+                new ChessmanData("black", "pawn", 0, 6),
+                new ChessmanData("black", "pawn", 1, 6),
+                new ChessmanData("black", "pawn", 2, 6),
+                new ChessmanData("black", "pawn", 3, 6),
+                new ChessmanData("black", "pawn", 4, 6),
+                new ChessmanData("black", "pawn", 5, 6),
+                new ChessmanData("black", "pawn", 6, 6),
+                new ChessmanData("black", "pawn", 7, 6)
+            };
+
+            InitializeBoard(pieceList);
         }
 
         GameObject.FindGameObjectWithTag("SaveButton").GetComponent<Button>().interactable = false;
@@ -209,7 +214,6 @@ public class Game : MonoBehaviour, IDataPersistence
         data.gameOver = gameOver;
 
         List<string> pieces = new List<string>();
-        int i = 0;
         foreach (GameObject boardSquare in board)
         {
             if (boardSquare == null) continue;

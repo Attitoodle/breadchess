@@ -33,7 +33,6 @@ public class MovePlate : MonoBehaviour
 
         if (IsAttackMove())
         {
-            Debug.Log(x + " " + (IsPassant() ? chessman.GetPlayer() == "white" ? y + 1 : y - 1 : y) + " " + IsPassant());
             GameObject targetPosition = game.GetPosition(x, IsPassant() ? chessman.GetPlayer() == "white" ? y - 1 : y + 1 : y);
             Chessman target = targetPosition.GetComponent<Chessman>();
             // TODO: add stalemate conditions; use a counter on the game object to track how many turns since a piece was taken(?)

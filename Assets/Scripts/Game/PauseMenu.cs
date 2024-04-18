@@ -1,15 +1,26 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PauseMenu : MonoBehaviour
 {
+    [Header("Menu Buttons")]
+    [SerializeField] private Button loadButton;
+    [SerializeField] private Button mainMenuButton;
+    [SerializeField] private Button resignButton;
+    [SerializeField] private Button resumeButton;
+    [SerializeField] private Button saveButton;
+    [SerializeField] private Button quitButton;
     public GameObject pauseMenu;
     public static bool isPaused = false;
+    private Game game;
+
     // Start is called before the first frame update
     void Start()
     {
         pauseMenu.SetActive(false);
+        game = GameObject.FindGameObjectWithTag("GameController").GetComponent<Game>();
     }
 
     // Update is called once per frame
@@ -23,6 +34,9 @@ public class PauseMenu : MonoBehaviour
             }
             else
             {
+                saveButton.interactable = !game.IsPristine();
+                resignButton.interactable = !game.IsPristine();
+                loadButton.interactable = DataPersistenceManager.instance.SaveExists();
                 PauseGame();
             }
         }
@@ -30,6 +44,7 @@ public class PauseMenu : MonoBehaviour
 
     public void GoToMainMenu()
     {
+        DisableAllButtons();
         Utils.LoadScene("Scenes/MainMenu");
     }
 
@@ -48,6 +63,8 @@ public class PauseMenu : MonoBehaviour
     }
     public void Resign()
     {
+        resignButton.interactable = false;
+        saveButton.interactable = false;
         Game game = GameObject.FindGameObjectWithTag("GameController").GetComponent<Game>();
         game.Winner(game.GetCurrentPlayer() == "white" ? "black" : "white");
         ResumeGame();
@@ -55,12 +72,29 @@ public class PauseMenu : MonoBehaviour
 
     public void SaveGame()
     {
+        saveButton.interactable = false;
         DataPersistenceManager.instance.SaveGame();
     }
 
     public void LoadGame()
     {
+        DisableAllButtons();
         Utils.LoadGame();
-        ResumeGame();
+        Utils.ReloadCurrentScene();
+    }
+
+    public void QuitGame()
+    {
+        DisableAllButtons();
+        Utils.QuitGame();
+    }
+    private void DisableAllButtons()
+    {
+        loadButton.interactable = false;
+        mainMenuButton.interactable = false;
+        resignButton.interactable = false;
+        resumeButton.interactable = false;
+        saveButton.interactable = false;
+        quitButton.interactable = false;
     }
 }
