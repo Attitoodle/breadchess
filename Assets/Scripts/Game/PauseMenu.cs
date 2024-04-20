@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class PauseMenu : MonoBehaviour
@@ -21,6 +22,12 @@ public class PauseMenu : MonoBehaviour
     {
         pauseMenu.SetActive(false);
         game = GameObject.FindGameObjectWithTag("GameController").GetComponent<Game>();
+        SceneManager.sceneUnloaded += OnSceneUnloaded;
+    }
+
+    public void OnSceneUnloaded(Scene current)
+    {
+        Time.timeScale = 1f;
     }
 
     // Update is called once per frame
@@ -35,7 +42,6 @@ public class PauseMenu : MonoBehaviour
             else
             {
                 saveButton.interactable = !game.IsPristine();
-                resignButton.interactable = !game.IsPristine();
                 loadButton.interactable = DataPersistenceManager.instance.SaveExists();
                 PauseGame();
             }

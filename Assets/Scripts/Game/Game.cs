@@ -18,23 +18,20 @@ public class Game : MonoBehaviour, IDataPersistence
 
     private int turnCounter = 0;
 
-    void Awake()
+    public void Awake()
     {
         PauseMenu.isPaused = false;
         // its not the pause menu. something is keeping the move plates from interacting with the pieces properly, pressing escape to go to the menu once fixes it for some reason. once the piece becomes interactable, though, the move plates dont properly collide with existing pieces (e.g., pawns can attack pawns infront of them)
     }
+
+    // public void Start()
+    // {
+    //     SceneManager.sceneUnloaded += OnSceneUnloaded;
+    // }
     private void InitializeBoard(List<ChessmanData> dataList)
     {
-        Debug.Log("isPaused " + PauseMenu.isPaused);
-        foreach (GameObject square in board)
-        {
-            if (square == null) continue;
-            Debug.Log(square.name);
-            Destroy(square);
-        }
         foreach (ChessmanData data in dataList)
         {
-            // Debug.Log(data.player + " " + data.piece + " " + data.x + "," + data.y);
             SetPosition(CreateChessman(data.player, data.piece, data.x, data.y));
         }
     }
@@ -52,6 +49,14 @@ public class Game : MonoBehaviour, IDataPersistence
 
         return boardSquare;
     }
+
+    // public void OnSceneUnloaded(Scene current)
+    // {
+    //     foreach (GameObject boardSquare in board)
+    //     {
+    //         Destroy(boardSquare);
+    //     }
+    // }
 
     public void SetPosition(GameObject boardSquare)
     {
@@ -114,8 +119,8 @@ public class Game : MonoBehaviour, IDataPersistence
         if (gameOver == true && Input.anyKeyDown && !(Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1) || Input.GetMouseButtonDown(2) || Input.GetKeyDown(KeyCode.Escape)))
         {
             gameOver = false;
-
-            SceneManager.LoadScene("Game");
+            DataPersistenceManager.instance.NewGame();
+            Utils.LoadScene("Game");
         }
 
     }
@@ -166,7 +171,7 @@ public class Game : MonoBehaviour, IDataPersistence
         }
         else
         {
-            List<ChessmanData> pieceList = new List<ChessmanData> {
+            InitializeBoard(new List<ChessmanData> {
                 new ChessmanData("white", "rook", 0, 0),
                 new ChessmanData("white", "knight", 1, 0),
                 new ChessmanData("white", "bishop", 2, 0),
@@ -199,12 +204,16 @@ public class Game : MonoBehaviour, IDataPersistence
                 new ChessmanData("black", "pawn", 5, 6),
                 new ChessmanData("black", "pawn", 6, 6),
                 new ChessmanData("black", "pawn", 7, 6)
-            };
-
-            InitializeBoard(pieceList);
+            });
         }
 
         GameObject.FindGameObjectWithTag("SaveButton").GetComponent<Button>().interactable = false;
+
+
+        // foreach (GameObject boardSquare in board)
+        // {
+        //     Debug.Log(boardSquare);
+        // }
     }
 
     public void SaveData(GameData data)

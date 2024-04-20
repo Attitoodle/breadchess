@@ -132,7 +132,6 @@ public class Chessman : MonoBehaviour
 
     private void OnMouseUp()
     {
-        Debug.Log(" test " + GetPlayer() + " " + GetPiece() + " " + GetX() + "," + GetY());
         if (!PauseMenu.isPaused && !controller.GetComponent<Game>().IsGameOver() && controller.GetComponent<Game>().GetCurrentPlayer() == GetPlayer())
         {
             DestroyMovePlates();
@@ -271,12 +270,14 @@ public class Chessman : MonoBehaviour
         if (GetPlayer() == "white")
         {
             targetY++;
-            if (!HasMoved()) jump = 1;
+            int increment = 1;
+            if (!HasMoved() && game.IsValidBoardPosition(x, targetY + increment) && game.GetPosition(x, targetY + increment) == null) jump = increment;
         }
         else
         {
             targetY--;
-            if (!HasMoved()) jump = -1;
+            int increment = -1;
+            if (!HasMoved() && game.IsValidBoardPosition(x, targetY + increment) && game.GetPosition(x, targetY + increment) == null) jump = increment;
             passantRow = 3;
         }
 
